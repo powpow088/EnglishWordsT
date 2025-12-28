@@ -68,16 +68,36 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
     });
   }, [allVoices]);
 
-  // Set default male voice to "Andrew Online" (United States)
+  // Set default male voice - prioritize Andrew, fallback to first available
   useEffect(() => {
     if (maleVoices.length > 0 && !selectedMaleVoiceURI) {
-      // Try to find "Andrew Online" from United States
-      const andrewVoice = maleVoices.find(v =>
+      // Priority 1: Try to find "Andrew Online" from United States (Windows)
+      let defaultVoice = maleVoices.find(v =>
         v.name.toLowerCase().includes('andrew') &&
         (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('united states') || v.lang.includes('en-US'))
       );
-      if (andrewVoice) {
-        setSelectedMaleVoiceURI(andrewVoice.voiceURI);
+
+      // Priority 2: Try to find any "Andrew" voice
+      if (!defaultVoice) {
+        defaultVoice = maleVoices.find(v => v.name.toLowerCase().includes('andrew'));
+      }
+
+      // Priority 3: Try to find common male voices (Alex for iOS, David for Windows)
+      if (!defaultVoice) {
+        const priorityNames = ['alex', 'david', 'daniel', 'james', 'tom', 'fred'];
+        for (const name of priorityNames) {
+          defaultVoice = maleVoices.find(v => v.name.toLowerCase().includes(name));
+          if (defaultVoice) break;
+        }
+      }
+
+      // Priority 4: Fallback to first available male voice
+      if (!defaultVoice && maleVoices.length > 0) {
+        defaultVoice = maleVoices[0];
+      }
+
+      if (defaultVoice) {
+        setSelectedMaleVoiceURI(defaultVoice.voiceURI);
       }
     }
   }, [maleVoices, selectedMaleVoiceURI]);
