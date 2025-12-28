@@ -28,8 +28,16 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
   }, []);
 
   const maleVoices = useMemo(() => {
-    // Keywords that indicate male voices - must contain one of these
-    const maleKeywords = ['male', 'david', 'daniel', 'james', 'mark', 'guy', 'ryan', 'christopher', 'eric', 'george', 'roger', 'sean', 'brian', 'matthew', 'joey', 'justin', 'stephen', 'rishi', 'thomas', 'william', 'arthur', 'henry', 'oliver', 'liam', 'aaron', 'connor', 'andrew', 'jacob', 'noah', 'ethan', 'mason', 'logan', 'lucas', 'jack', 'benjamin', 'elijah', 'michael', 'alexander', 'anthony', 'joshua'];
+    // Keywords that indicate male voices - including iOS/Android voice names
+    const maleKeywords = [
+      'male',
+      // Windows
+      'david', 'mark', 'guy', 'ryan', 'christopher', 'eric', 'george', 'roger', 'sean', 'brian', 'matthew', 'joey', 'justin', 'stephen', 'rishi', 'thomas', 'william', 'arthur', 'henry', 'oliver', 'liam', 'aaron', 'connor', 'andrew', 'jacob', 'noah', 'ethan', 'mason', 'logan', 'lucas', 'jack', 'benjamin', 'elijah', 'michael', 'alexander', 'anthony', 'joshua',
+      // iOS/macOS
+      'alex', 'fred', 'tom', 'junior', 'ralph', 'albert', 'bruce', 'daniel',
+      // Android/Google
+      'james'
+    ];
 
     // Region priority for sorting (lower = higher priority)
     const getRegionPriority = (name: string, lang: string): number => {

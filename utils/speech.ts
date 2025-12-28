@@ -35,38 +35,42 @@ export const speakWord = (text: string, gender: 'male' | 'female' = 'female', sp
   utterance.pitch = 1;
 
   const voices = window.speechSynthesis.getVoices();
-  
+
   let selectedVoice: SpeechSynthesisVoice | undefined;
+  let foundMaleVoice = false;
 
   // 1. If a specific voice URI is provided (user selected), try to find it
   if (specificVoiceURI) {
     selectedVoice = voices.find(v => v.voiceURI === specificVoiceURI);
+    if (selectedVoice) foundMaleVoice = true;
   }
 
   // 2. Fallback Heuristic if no specific voice or specific voice not found
   if (!selectedVoice) {
     if (gender === 'male') {
-      // Priority 1: Google UK English Male (User Request)
-      selectedVoice = voices.find(v => v.name === 'Google UK English Male');
+      // Extended male keywords including iOS/Android voices
+      const maleKeywords = [
+        'male',
+        // Windows
+        'david', 'daniel', 'mark', 'guy', 'ryan', 'andrew', 'christopher', 'eric', 'george', 'roger', 'sean', 'brian', 'matthew',
+        // iOS/macOS
+        'alex', 'fred', 'tom', 'junior', 'ralph', 'albert', 'bruce',
+        // Google/Android
+        'james'
+      ];
 
-      // Priority 2: Any en-GB voice that looks like Google Male
-      if (!selectedVoice) {
-        selectedVoice = voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('male'));
-      }
+      // Try to find any voice matching male keywords
+      selectedVoice = voices.find(v =>
+        v.lang.includes('en') &&
+        maleKeywords.some(keyword => v.name.toLowerCase().includes(keyword))
+      );
 
-      // Priority 3: General Male Keywords
-      if (!selectedVoice) {
-        const maleKeywords = ['male', 'david', 'daniel'];
-        selectedVoice = voices.find(v => 
-          v.lang.includes('en') && 
-          maleKeywords.some(keyword => v.name.toLowerCase().includes(keyword))
-        );
-      }
+      if (selectedVoice) foundMaleVoice = true;
     } else {
       // Female Logic
-      const femaleKeywords = ['female', 'zira', 'samantha', 'google us english', 'google uk english female'];
-      selectedVoice = voices.find(v => 
-        v.lang.includes('en') && 
+      const femaleKeywords = ['female', 'zira', 'samantha', 'google us english', 'google uk english female', 'victoria', 'karen', 'moira', 'fiona'];
+      selectedVoice = voices.find(v =>
+        v.lang.includes('en') &&
         femaleKeywords.some(keyword => v.name.toLowerCase().includes(keyword))
       );
     }
@@ -74,17 +78,21 @@ export const speakWord = (text: string, gender: 'male' | 'female' = 'female', sp
 
   // Fallback 3: If specific gender not found, try to find any 'en-US' voice
   if (!selectedVoice) {
-     selectedVoice = voices.find(v => v.lang === 'en-US');
+    selectedVoice = voices.find(v => v.lang === 'en-US');
   }
 
   // Fallback 4: Any English voice
   if (!selectedVoice) {
     selectedVoice = voices.find(v => v.lang.includes('en'));
   }
-  
+
   if (selectedVoice) {
     utterance.voice = selectedVoice;
-    // Update rate based on voice? Usually Google voices are quite fast, 0.8 is good.
+  }
+
+  // If male was requested but no male voice was found, lower the pitch to simulate male voice
+  if (gender === 'male' && !foundMaleVoice) {
+    utterance.pitch = 0.7; // Lower pitch for male-like sound
   }
 
   window.speechSynthesis.speak(utterance);
