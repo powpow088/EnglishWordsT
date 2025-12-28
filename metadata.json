@@ -1,0 +1,7 @@
+{
+  "name": "英文聽寫",
+  "description": "An interactive English vocabulary dictation app for TEAMMS students with speech synthesis and gamified results.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
