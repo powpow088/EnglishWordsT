@@ -68,39 +68,63 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
     });
   }, [allVoices]);
 
-  // Set default male voice - prioritize Andrew, fallback to first available
+  // Get all English voices as fallback when no male voices are detected
+  const allEnglishVoices = useMemo(() => {
+    const getRegionPriority = (name: string, lang: string): number => {
+      const text = (name + ' ' + lang).toLowerCase();
+      if (text.includes('united states') || text.includes('en-us') || text.includes('en_us')) return 1;
+      if (text.includes('canada') || text.includes('en-ca') || text.includes('en_ca')) return 2;
+      if (text.includes('australia') || text.includes('en-au') || text.includes('en_au')) return 3;
+      if (text.includes('united kingdom') || text.includes('en-gb') || text.includes('en_gb') || text.includes('british')) return 4;
+      return 99;
+    };
+
+    return allVoices
+      .filter(v => v.lang.includes('en'))
+      .sort((a, b) => {
+        const priorityA = getRegionPriority(a.name, a.lang);
+        const priorityB = getRegionPriority(b.name, b.lang);
+        if (priorityA !== priorityB) return priorityA - priorityB;
+        return a.name.localeCompare(b.name);
+      });
+  }, [allVoices]);
+
+  // Use maleVoices if available, otherwise show all English voices
+  const voicesForDadMode = maleVoices.length > 0 ? maleVoices : allEnglishVoices;
+
+  // Set default voice for Dad mode - prioritize male voices, fallback to first available
   useEffect(() => {
-    if (maleVoices.length > 0 && !selectedMaleVoiceURI) {
+    if (voicesForDadMode.length > 0 && !selectedMaleVoiceURI) {
       // Priority 1: Try to find "Andrew Online" from United States (Windows)
-      let defaultVoice = maleVoices.find(v =>
+      let defaultVoice = voicesForDadMode.find(v =>
         v.name.toLowerCase().includes('andrew') &&
         (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('united states') || v.lang.includes('en-US'))
       );
 
       // Priority 2: Try to find any "Andrew" voice
       if (!defaultVoice) {
-        defaultVoice = maleVoices.find(v => v.name.toLowerCase().includes('andrew'));
+        defaultVoice = voicesForDadMode.find(v => v.name.toLowerCase().includes('andrew'));
       }
 
       // Priority 3: Try to find common male voices (Alex for iOS, David for Windows)
       if (!defaultVoice) {
         const priorityNames = ['alex', 'david', 'daniel', 'james', 'tom', 'fred'];
         for (const name of priorityNames) {
-          defaultVoice = maleVoices.find(v => v.name.toLowerCase().includes(name));
+          defaultVoice = voicesForDadMode.find(v => v.name.toLowerCase().includes(name));
           if (defaultVoice) break;
         }
       }
 
-      // Priority 4: Fallback to first available male voice
-      if (!defaultVoice && maleVoices.length > 0) {
-        defaultVoice = maleVoices[0];
+      // Priority 4: Fallback to first available voice
+      if (!defaultVoice && voicesForDadMode.length > 0) {
+        defaultVoice = voicesForDadMode[0];
       }
 
       if (defaultVoice) {
         setSelectedMaleVoiceURI(defaultVoice.voiceURI);
       }
     }
-  }, [maleVoices, selectedMaleVoiceURI]);
+  }, [voicesForDadMode, selectedMaleVoiceURI]);
 
   const teams = useMemo(() => {
     return Array.from(new Set(VOCABULARY_DATA.map(w => w.team))).sort();
@@ -217,7 +241,7 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
           </div>
 
           {/* Detailed Voice Selection for Male */}
-          {selectedGender === 'male' && maleVoices.length > 0 && (
+          {selectedGender === 'male' && voicesForDadMode.length > 0 && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -225,18 +249,23 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
             >
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-bold text-blue-600 uppercase">
-                  自選男聲 (偵測到 {maleVoices.length} 種)
+                  {maleVoices.length > 0
+                    ? `自選男聲 (偵測到 ${maleVoices.length} 種)`
+                    : `自選英文語音 (偵測到 ${voicesForDadMode.length} 種)`}
                 </label>
                 <button onClick={testVoice} className="text-xs flex items-center gap-1 bg-blue-200 hover:bg-blue-300 text-blue-800 px-2 py-1 rounded-md transition-colors font-bold">
                   <Volume2 className="w-3 h-3" /> 試聽
                 </button>
               </div>
+              {maleVoices.length === 0 && (
+                <p className="text-xs text-orange-600 mb-2">⚠️ 未偵測到男聲，顯示所有英文語音供選擇</p>
+              )}
               <select
                 value={selectedMaleVoiceURI}
                 onChange={(e) => setSelectedMaleVoiceURI(e.target.value)}
                 className="w-full text-sm p-2 rounded-lg border-2 border-blue-200 bg-white text-gray-700 outline-none focus:border-blue-400"
               >
-                {maleVoices.map(v => (
+                {voicesForDadMode.map(v => (
                   <option key={v.voiceURI} value={v.voiceURI}>
                     {v.name} ({v.lang})
                   </option>
