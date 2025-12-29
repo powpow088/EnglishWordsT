@@ -31,6 +31,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ words, voiceGender, spec
   const [results, setResults] = useState<QuizResult[]>([]);
   const [feedback, setFeedback] = useState<FeedbackState>('idle');
   const [isListening, setIsListening] = useState(false);
+  const [speechRate, setSpeechRate] = useState<number>(0.8);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimeRef = useRef<number>(Date.now());
@@ -42,12 +43,12 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ words, voiceGender, spec
     // Only speak and focus if we are in idle state (ready for input)
     if (feedback === 'idle') {
       const timeout = setTimeout(() => {
-        speakWord(currentWord.english, voiceGender, specificVoiceURI);
+        speakWord(currentWord.english, voiceGender, specificVoiceURI, speechRate);
         inputRef.current?.focus();
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [currentIndex, currentWord, feedback, voiceGender, specificVoiceURI]);
+  }, [currentIndex, currentWord, feedback, voiceGender, specificVoiceURI, speechRate]);
 
   // Cleanup speech recognition on unmount or when moving to next word
   useEffect(() => {
@@ -166,7 +167,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ words, voiceGender, spec
 
   const handleSpeakAgain = () => {
     if (feedback !== 'idle') return;
-    speakWord(currentWord.english, voiceGender, specificVoiceURI);
+    speakWord(currentWord.english, voiceGender, specificVoiceURI, speechRate);
     inputRef.current?.focus();
   };
 
@@ -255,7 +256,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ words, voiceGender, spec
           </div>
 
           {/* Audio Button */}
-          <div className="mb-6 relative mt-8">
+          <div className="mb-4 relative mt-8">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -271,9 +272,31 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ words, voiceGender, spec
                 <span className="text-yellow-800 font-bold text-[10px]">?</span>
               </div>
             </motion.button>
-            <p className="mt-4 text-sky-400 font-bold uppercase tracking-widest text-xs">
+            <p className="mt-2 text-sky-400 font-bold uppercase tracking-widest text-xs">
               點擊再聽一次
             </p>
+
+            {/* Speed Control - Compact */}
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <button
+                onClick={() => { setSpeechRate(0.5); speakWord(currentWord.english, voiceGender, specificVoiceURI, 0.5); }}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${speechRate === 0.5 ? 'bg-amber-400 text-white shadow-md' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'}`}
+              >
+                🐢 慢
+              </button>
+              <button
+                onClick={() => { setSpeechRate(0.8); speakWord(currentWord.english, voiceGender, specificVoiceURI, 0.8); }}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${speechRate === 0.8 ? 'bg-amber-400 text-white shadow-md' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'}`}
+              >
+                正常
+              </button>
+              <button
+                onClick={() => { setSpeechRate(1.0); speakWord(currentWord.english, voiceGender, specificVoiceURI, 1.0); }}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${speechRate === 1.0 ? 'bg-amber-400 text-white shadow-md' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'}`}
+              >
+                🐇 快
+              </button>
+            </div>
           </div>
 
           {/* Hint Card */}

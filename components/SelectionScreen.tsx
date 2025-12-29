@@ -279,13 +279,13 @@ export const SelectionScreen: React.FC<SelectionScreenProps> = ({ onStartQuiz })
 
         <div className="flex items-center gap-2 text-sky-600 font-black text-lg uppercase tracking-wider">
           <Settings2 className="w-6 h-6" />
-          課程設定
+          考試範圍
         </div>
 
         {/* Dropdowns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-extrabold text-gray-400 uppercase ml-1">Team (團隊)</label>
+            <label className="text-sm font-extrabold text-gray-400 uppercase ml-1">Team (課本)</label>
             <select
               className="w-full p-4 bg-sky-50 border-2 border-sky-100 rounded-2xl font-bold text-sky-800 focus:ring-4 focus:ring-sky-200 focus:border-sky-400 outline-none transition-all cursor-pointer hover:bg-sky-100 appearance-none"
               value={selectedTeam}

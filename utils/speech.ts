@@ -20,7 +20,7 @@ export const getAvailableVoices = (): Promise<SpeechSynthesisVoice[]> => {
   });
 };
 
-export const speakWord = (text: string, gender: 'male' | 'female' = 'female', specificVoiceURI?: string) => {
+export const speakWord = (text: string, gender: 'male' | 'female' = 'female', specificVoiceURI?: string, speechRate: number = 0.8) => {
   if (!('speechSynthesis' in window)) {
     console.warn("Text-to-speech not supported in this browser.");
     return;
@@ -31,7 +31,7 @@ export const speakWord = (text: string, gender: 'male' | 'female' = 'female', sp
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'en-US'; // Default base lang
-  utterance.rate = 0.8; // Slightly slower for clarity
+  utterance.rate = speechRate; // Adjustable rate (0.5 = slow, 1.0 = normal, 1.5 = fast)
   utterance.pitch = 1;
 
   const voices = window.speechSynthesis.getVoices();

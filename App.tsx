@@ -41,23 +41,23 @@ export default function App() {
   return (
     // Fun Background with a pattern
     <div className="min-h-screen font-sans text-gray-800 bg-sky-100 flex flex-col"
-         style={{
-           backgroundImage: `radial-gradient(#ffffff 2px, transparent 2px), radial-gradient(#ffffff 2px, transparent 2px)`,
-           backgroundSize: '32px 32px',
-           backgroundPosition: '0 0, 16px 16px',
-           backgroundColor: '#e0f2fe' // Sky 100
-         }}>
-      
+      style={{
+        backgroundImage: `radial-gradient(#ffffff 2px, transparent 2px), radial-gradient(#ffffff 2px, transparent 2px)`,
+        backgroundSize: '32px 32px',
+        backgroundPosition: '0 0, 16px 16px',
+        backgroundColor: '#e0f2fe' // Sky 100
+      }}>
+
       {/* Main Content Area - Full Height centered */}
       <main className="flex-1 w-full max-w-4xl mx-auto py-4 md:py-8 flex flex-col justify-center">
         {screen === AppScreen.SELECTION && (
           <SelectionScreen onStartQuiz={startQuiz} />
         )}
-        
+
         {screen === AppScreen.QUIZ && (
-          <QuizScreen 
-            words={selectedWords} 
-            voiceGender={selectedGender} 
+          <QuizScreen
+            words={selectedWords}
+            voiceGender={selectedGender}
             specificVoiceURI={selectedVoiceURI}
             onFinish={finishQuiz}
             onExit={restartApp}
@@ -68,7 +68,7 @@ export default function App() {
           <ResultScreen results={quizResults} duration={quizDuration} onRestart={restartApp} />
         )}
       </main>
-      
+
       {/* Footer */}
       <footer className="py-4 text-center text-sky-800/50 font-bold text-xs md:text-sm">
         <p>持續練習，成為單字大師！</p>
